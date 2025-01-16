@@ -19,15 +19,51 @@ Da bi projekat radio, moraš da imaš sledeće instalirano:
 
 ## Instalacija
 
-1. **Kloniraj projekat**:
+1. **Kreiraj virtualno okruženje**:
    ```bash
-   git clone https://github.com/korisnickoime/zara-scraper.git
-   cd zara-scraper
-2. **Kreiraj virtualno okruženje:**
-  ```bash
-  python -m venv .venv
-3. **Aktiviraj virtualno okruženje:**
-  ```bash #Na windows
-  .\.venv\Scripts\activate
+   python -m venv .v
+env
+   ```
+
+2. **Aktiviraj virtualno okruženje**:
+   - Na **Windows-u**:
+     ```bash
+     .\.venv\Scripts\activate
+     ```
+   - Na **Mac/Linux-u**:
+     ```bash
+     source .venv/bin/activate
+     ```
+
+3. **Instaliraj potrebne biblioteke**:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Konfiguriši `.env` fajl**:
+   Kreiraj **`.env`** fajl u korenskom direktorijumu sa sledećim podacima:
+   ```txt
+   EMAIL=your_email@example.com
+   PASSWORD=your_password
+   SENDGRID_API_KEY=your_sendgrid_api_key
+   SENDER_EMAIL=your_send_email@example.com
+   SENDER_PASSWORD=your_sender_email_password
+   ```
+
+5. **Pokreni aplikaciju**:
+   ```bash
+   python scraper.py
+   ```
+```
+Kako funkcioniše
+Skripta koristi Selenium za automatsko otvaranje web stranice Zare, prijavu na korisnički nalog i proveru dostupnosti proizvoda u listi omiljenih. 
+Kada se nađe proizvod u željenoj veličini, klikne se na njega, dodaje u korpu i šalje obavestenje putem SendGrid-a na zadatu email adresu.
+
+## Licenca
+
+Ovaj projekat je licenciran pod [MIT licencom](LICENSE).
+
+
+
 
 
