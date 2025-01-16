@@ -54,7 +54,7 @@ Da bi projekat radio, moraš da imaš sledeće instalirano:
    ```bash
    python scraper.py
    ```
-```
+
 Kako funkcioniše
 Skripta koristi Selenium za automatsko otvaranje web stranice Zare, prijavu na korisnički nalog i proveru dostupnosti proizvoda u listi omiljenih. 
 Kada se nađe proizvod u željenoj veličini, klikne se na njega, dodaje u korpu i šalje obavestenje putem SendGrid-a na zadatu email adresu.
