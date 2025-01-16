@@ -118,7 +118,7 @@ def run_scraper():
 
 
 # Postavljanje zadatka da se izvršava svakih 3 minuta
-schedule.every(10).seconds.do(run_scraper)
+schedule.every(90).seconds.do(run_scraper)
 
 # Stalna petlja koja proverava kada treba da pokrene zadatke
 while True:
