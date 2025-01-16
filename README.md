@@ -22,7 +22,7 @@ Da bi projekat radio, moraš da imaš sledeće instalirano:
 1. **Kreiraj virtualno okruženje**:
    ```bash
    python -m venv .v
-env
+
    ```
 
 2. **Aktiviraj virtualno okruženje**:
