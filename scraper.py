@@ -179,7 +179,7 @@ def run_scraper():
 
 
 # Podesite interval po potrebi
-schedule.every(2).seconds.do(run_scraper)
+schedule.every(90).seconds.do(run_scraper)
 
 while True:
     schedule.run_pending()
