@@ -167,79 +167,82 @@ def run_scraper():
         driver.quit()
         return
 
-    random_sleep(2, 4)
+    while True:
+        time.sleep(2)
 
-    # Sad probamo da pronađemo wishlist grid
-    try:
-        wishlist_grid = driver.find_element(By.CLASS_NAME, "wishlist-items-grid")
-    except Exception as e:
-        print(f"Nije pronađen wishlist grid: {e}")
-        driver.quit()
-        return
+        # Sad probamo da pronađemo wishlist grid
+        try:
+            wishlist_grid = driver.find_element(By.CLASS_NAME, "wishlist-items-grid")
+        except Exception as e:
+            print(f"Nije pronađen wishlist grid: {e}")
+            driver.quit()
+            return
 
-    products = wishlist_grid.find_elements(By.CLASS_NAME, "wishlist-item")
+        products = wishlist_grid.find_elements(By.CLASS_NAME, "wishlist-item")
 
-    for product in products:
-        if "wishlist-item--disabled" not in product.get_attribute("class"):
-            try:
-                driver.execute_script("arguments[0].scrollIntoView(true);", product)
-                random_sleep()
+        for product in products:
+            if "wishlist-item--disabled" not in product.get_attribute("class"):
+                try:
+                    driver.execute_script("arguments[0].scrollIntoView(true);", product)
+                    random_sleep()
 
-                # Klik na "Add to bag"
-                add_button = product.find_element(
-                    By.CSS_SELECTOR, ".wishlist-item-purchase-intention-actions__size-selector-toggle"
-                )
-                add_button.click()
-                random_sleep()
+                    # Klik na "Add to bag"
+                    add_button = product.find_element(
+                        By.CSS_SELECTOR, ".wishlist-item-purchase-intention-actions__size-selector-toggle"
+                    )
+                    add_button.click()
+                    random_sleep()
 
-                # Da li proizvod ima veličine?
-                size_buttons = product.find_elements(By.CSS_SELECTOR, ".size-selector-list__item-button")
+                    # Da li proizvod ima veličine?
+                    size_buttons = product.find_elements(By.CSS_SELECTOR, ".size-selector-sizes-size__button")
 
-                if not size_buttons:
+
+                    if not size_buttons:
+                        continue
+
+                    # Ako ima veličina
+                    for size in size_buttons:
+                        size_label = size.find_element(By.CSS_SELECTOR, "[data-qa-qualifier='size-selector-sizes-size-label']").text.strip()
+
+                        size_action = size.get_attribute("data-qa-action")
+
+                        # Klikćemo samo na veličine sa "size-in-stock" i koje su XS, S, ili 38
+                        if size_action == "size-in-stock" and size_label in ["XS", "S", "38"]:
+                            size.click()
+                            random_sleep()
+
+                            expected_toast_text = f"Veličina {size_label} je dodata u Vašu korpu."
+
+                            try:
+                                toast_element = WebDriverWait(driver, 3).until(
+                                    EC.visibility_of_element_located((By.CSS_SELECTOR, ".zds-toast-message"))
+                                )
+                                toast_text = toast_element.text.strip()
+
+                                if expected_toast_text in toast_text:
+                                    added_sizes.append(size_label)
+                                    WebDriverWait(driver, 5).until(
+                                        EC.invisibility_of_element_located((By.CSS_SELECTOR, ".zds-toast-message"))
+                                    )
+                            except TimeoutException:
+                                print("WARNING: Toast za veličinu se nije pojavio.")
+                            break
+                except Exception as e:
+                    print(f"Greška prilikom obrade proizvoda: {e}")
                     continue
 
-                # Ako ima veličina
-                for size in size_buttons:
-                    size_label = size.find_element(By.CSS_SELECTOR, "[data-qa-qualifier='product-size-info-main-label']").text.strip()
-                    size_action = size.get_attribute("data-qa-action")
+        if added_sizes:
+            sizes_str = ", ".join(added_sizes)
+            subject = "Proizvodi dodati u korpu"
+            body = f"Dodate veličine u korpu: {sizes_str}"
+            send_email(subject, body, email)
 
-                    # Klikćemo samo na veličine sa "size-in-stock" i koje su XS, S, ili 38
-                    if size_action == "size-in-stock" and size_label in ["XS", "S", "38"]:
-                        size.click()
-                        random_sleep()
-
-                        expected_toast_text = f"Veličina {size_label} je dodata u Vašu korpu."
-
-                        try:
-                            toast_element = WebDriverWait(driver, 3).until(
-                                EC.visibility_of_element_located((By.CSS_SELECTOR, ".zds-toast-message"))
-                            )
-                            toast_text = toast_element.text.strip()
-
-                            if expected_toast_text in toast_text:
-                                added_sizes.append(size_label)
-                                WebDriverWait(driver, 5).until(
-                                    EC.invisibility_of_element_located((By.CSS_SELECTOR, ".zds-toast-message"))
-                                )
-                        except TimeoutException:
-                            print("WARNING: Toast za veličinu se nije pojavio.")
-                        break
-            except Exception as e:
-                print(f"Greška prilikom obrade proizvoda: {e}")
-                continue
-
-    if added_sizes:
-        sizes_str = ", ".join(added_sizes)
-        subject = "Proizvodi dodati u korpu"
-        body = f"Dodate veličine u korpu: {sizes_str}"
-        send_email(subject, body, email)
-
-    random_sleep(2, 4)
-    driver.quit()
+        time.sleep(5)
+        driver.refresh()
 
 
 # Automatizacija na svakih 10 minuta
-schedule.every(7).minutes.do(run_scraper)
+schedule.every(7).seconds.do(run_scraper)
 
 print("Scheduler pokrenut. Skripta će raditi u pozadini...")
 
